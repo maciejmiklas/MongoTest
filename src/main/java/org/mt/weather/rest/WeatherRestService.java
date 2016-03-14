@@ -1,17 +1,14 @@
 package org.mt.weather.rest;
 
-import org.mt.weather.model.Weather;
+import org.mt.weather.model.DayWeather;
 import org.mt.weather.service.WeatherService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDate;
 
 @Path("/weather")
 @Named
@@ -20,19 +17,22 @@ public class WeatherRestService {
     @Inject
     private WeatherService weatherService;
 
-    // curl http://localhost:15121/rest/weather/now/cc/MUC
+    // curl http://localhost:8080/rest/weather/day/now/cc/MUC/dd/2007-12-03
     @GET
-    @Path("now/cc/{countryCode}")
-    @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-    public Weather getForecastForCountryNow(@PathParam("countryCode") String countryCode) {
-	Weather weather = weatherService.findWeather(null, null);
-	return weather;
+    @Path("day/now/cc/{countryCode}/dd/{date}")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public DayWeather getForecastForCountryNow(@PathParam("countryCode") String countryCode,
+                                               @PathParam("date") String date) {
+        DayWeather weather = weatherService.findWeatherForDay(countryCode, LocalDate.parse(date));
+        return weather;
     }
 
+    // curl -X POST http://localhost:8080/rest/weather/gen
     @POST
     @Path("gen")
     public Response generate() {
-	weatherService.geenrate();
-	return Response.ok().build();
+        long start = System.currentTimeMillis();
+        weatherService.generate();
+        return Response.ok("OK - generation took: " + (System.currentTimeMillis() - start) + " ms\n").build();
     }
 }
