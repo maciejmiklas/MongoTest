@@ -10,16 +10,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 
-@Path("/weather")
+@Path("/weather/day")
 @Named
-public class WeatherRestService {
+public class DayWeatherRestService {
 
     @Inject
     private WeatherService weatherService;
 
-    // curl http://localhost:8080/rest/weather/day/now/cc/MUC/dd/2007-12-03
+    // curl http://localhost:8080/rest/weather/day/one/cc/MUC/dd/2007-12-03
     @GET
-    @Path("day/now/cc/{countryCode}/dd/{date}")
+    @Path("one/cc/{countryCode}/dd/{date}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public DayWeather getForecastForCountryNow(@PathParam("countryCode") String countryCode,
                                                @PathParam("date") String date) {
@@ -27,7 +27,7 @@ public class WeatherRestService {
         return weather;
     }
 
-    // curl -X POST http://localhost:8080/rest/weather/gen
+    // curl -X POST http://localhost:8080/rest/weather/day/gen
     @POST
     @Path("gen")
     public Response generate() {
