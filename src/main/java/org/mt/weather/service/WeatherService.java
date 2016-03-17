@@ -4,6 +4,7 @@ import org.mt.weather.model.City;
 import org.mt.weather.model.DayWeather;
 import org.mt.weather.service.intern.converter.DateUtils;
 import org.mt.weather.service.intern.repository.WeatherRepository;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.inject.Inject;
@@ -48,10 +49,30 @@ public class WeatherService {
 	    City.ofCoordinates("NWS", 55.178868, 11.796570)
     };
 
-    public DayWeather findWeatherForDay(String countryCode, LocalDate date) {
+    public DayWeather findWeatherForDayNear(String countryCode, LocalDate date) {
 	DayWeather found = template.findOne(query(where("city.code").is(countryCode).
 		and("date").gte(DateUtils.asDate(date))), DayWeather.class);
 	return found;
+    }
+
+    public DayWeather findWeatherForDayNear(Point location, LocalDate date) {
+	LocalDate prevDay = date.minusDays(1);
+
+	DayWeather found = template.findOne(
+		query(where("date").gte(DateUtils.asDate(prevDay)).lte(DateUtils.asDate(date))
+			.and("city.location")
+			.near(location))
+		,
+		DayWeather.class);
+	return found;
+    }
+
+    public City findCityNear(Point location) {
+	DayWeather found = template.findOne(query(where("city.location").near(location)), DayWeather.class);
+	if (found == null) {
+	    return null;
+	}
+	return found.getCity();
     }
 
     public void generate() {
